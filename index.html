@@ -282,6 +282,16 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
 
 /* 결과 */
 .res-grid{background:#fff;border-radius:18px;padding:10px}
+.links{display:flex;flex-direction:column;gap:10px}
+.lnk{display:flex;align-items:center;gap:12px;min-height:64px;padding:10px 16px;border-radius:20px;background:#fff;color:var(--ink);text-decoration:none;box-shadow:var(--tsh);transition:transform .08s}
+.lnk:active{transform:translateY(2px)}
+.lnk .li{flex:0 0 44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;color:#fff}
+.lnk.map .li{background:linear-gradient(160deg,#5BC895,#2E9E6B)}
+.lnk.ig .li{background:linear-gradient(45deg,#F9A13A,#E1306C 55%,#833AB4)}
+.lnk .lt2{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.35}
+.lnk b{font-size:clamp(16px,4.4vw,18px)}
+.lnk small{font-size:13px;color:var(--muted)}
+.lnk .ar{font-size:20px;color:var(--accent)}
 .toprow{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .toprow .chip{align-self:center}
 .snd{flex:0 0 auto;width:44px;height:44px;border-radius:50%;border:0;background:#fff;box-shadow:var(--tsh);display:inline-flex;align-items:center;justify-content:center;cursor:pointer;color:var(--ink)}
@@ -607,6 +617,8 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
     if (g.wrong<=3) return ['든든한 길잡이','거의 다 맞혔어요. 오늘 배운 낱말을 주변에도 알려 주세요.'];
     return ['함께 걷는 이웃','조금 헤맸어도 괜찮아요. 오늘 알게 된 낱말이 내일의 길을 넓혀요.'];
   }
+  var ICON_MAP='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>';
+  var ICON_IG='<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor"/></svg>';
   var ICON_BOOK='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#6A4CF0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5z"/><path d="M4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>';
   var ICON_BULB='<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#C9930A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0 0 12 3z"/></svg>';
 
@@ -689,6 +701,10 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
           '<div class="res-grid" role="img" aria-label="완성된 십자말풀이 판">'+gridHTML(true)+'</div>'+
           '<button class="cta" type="button" data-act="share">친구에게 링크 보내기</button>'+
           '<p class="status" id="st" role="status"></p>'+
+          '<div class="links">'+
+            '<a class="lnk map" href="https://naeilmap.com" target="_blank" rel="noopener"><span class="li">'+ICON_MAP+'</span><span class="lt2"><b>광주 무장애지도 보러가기</b><small>내일맵 · naeilmap.com</small></span><span class="ar" aria-hidden="true">→</span></a>'+
+            '<a class="lnk ig" href="https://www.instagram.com/naeil__official/" target="_blank" rel="noopener"><span class="li">'+ICON_IG+'</span><span class="lt2"><b>모두의 내일 인스타그램</b><small>@naeil__official</small></span><span class="ar" aria-hidden="true">→</span></a>'+
+          '</div>'+
           '<h2 class="replay-h">문제별 다시 풀기</h2><div class="replay">'+qButtons()+'</div>'+
           '<div class="row"><button class="ghost" type="button" data-act="restart">처음부터 다시 하기</button></div>'+
           '<p class="foot"><span class="ph">인권잡지 「다다름」</span> × <span class="ph">광산구장애인복지관</span> × <span class="ph">모두의 내일</span></p>'+
