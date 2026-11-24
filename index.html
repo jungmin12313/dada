@@ -446,9 +446,23 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
   }
   // 낮고 둥근 '귀여운' 톤: 사인·삼각파만, 가장 높은 음도 E6(1319Hz) 이하
   function bell(f, at, dur, vol){ tone({ f:f, at:at, dur:dur, vol:vol, type:'sine' }); tone({ f:f*2, at:at, dur:dur*.45, vol:vol*.18, type:'sine' }); }
+  // 물방울형 소리: 처음 몇십 ms 동안 빠르게 올라갔다가 둥글게 사라짐
+  function drop(f1, f2, sweep, dur, vol){
+    var a = ac(); if (!a) return;
+    var t = a.currentTime, osc = a.createOscillator(), gn = a.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(f1, t);
+    osc.frequency.exponentialRampToValueAtTime(f2, t + sweep);
+    gn.gain.setValueAtTime(0.0001, t);
+    gn.gain.linearRampToValueAtTime(vol, t + .002);
+    gn.gain.setTargetAtTime(0.0001, t + .002, dur / 5);
+    osc.connect(gn); gn.connect(a.destination);
+    osc.start(t); osc.stop(t + dur + .05);
+  }
   var SFX = {
     // 뿅: 물방울이 톡 튀는 소리 (아래에서 위로 짧게)
-    tap: function(){ var f = 300 + Math.random() * 60; tone({ f:f, f2:f * 1.9, dur:.12, vol:.28, type:'sine' }); tone({ f:f * 1.5, f2:f * 2.4, at:.02, dur:.07, vol:.06, type:'triangle' }); },
+    // 퐁: 물속 거품이 둥글게 올라오는 소리 (B안)
+    tap: function(){ var m = .95 + Math.random() * .13; drop(260 * m, 620 * m, .06, .16, .32); drop(520 * m, 1240 * m, .06, .06, .04); },
     undo: function(){ tone({ f:420, f2:260, dur:.12, vol:.2, type:'sine' }); },
     // 땡: '어-어' 하고 내려가는 두 음 (거친 부저 대신)
     wrong: function(){ bell(392, 0, .26, .22); tone({ f:330, f2:262, at:.2, dur:.42, vol:.22, type:'triangle' }); tone({ f:165, at:.2, dur:.42, vol:.08, type:'sine' }); },
