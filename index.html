@@ -25,6 +25,14 @@
 <meta name="twitter:image" content="https://dadareum.naeilmap.com/og-image.jpg">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- Google Analytics 4 (익명 방문 통계) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-KV0L372SQM"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-KV0L372SQM');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jua&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
@@ -572,6 +580,8 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
   var COLS=C1-C0+1, SOL={};
   WORDS.forEach(function(w){ w.cells.forEach(function(p,k){ SOL[p[0]+'-'+p[1]]=w.ans[k]; }); });
 
+  function track(name, params){ try { if (typeof window.gtag === 'function') window.gtag('event', name, params || {}); } catch(e) {} }
+  var COMPLETED = false;
   function fresh(screen){ return { screen:screen, step:0, picked:[], modal:null, wrong:0, tries:0, revealed:0, solved:WORDS.map(function(){ return false; }) }; }
   var g = fresh('start');
   function solvedCount(){ return g.solved.filter(Boolean).length; }
@@ -641,6 +651,7 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
           '<p class="bubble pop-late"><span class="ph">낱말 조각을 모아</span> <span class="ph">장벽 없는 길을</span> <span class="ph">만들어 줘!</span></p>'+
           '<button class="cta" type="button" data-act="start">같이 가자!</button>'+
           '<p class="meta"><span class="ph">'+WORDS.length+'문제 · 약 5분</span> · <span class="ph">화면낭독기·키보드 지원</span></p>'+
+          '<p class="foot">서비스 개선을 위해 익명 방문 통계를 수집합니다.</p>'+
         '</div>'+
         '</section></main>';
     } else if (g.screen==='play') {
@@ -708,6 +719,7 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
           '<h2 class="replay-h">문제별 다시 풀기</h2><div class="replay">'+qButtons()+'</div>'+
           '<div class="row"><button class="ghost" type="button" data-act="restart">처음부터 다시 하기</button></div>'+
           '<p class="foot"><span class="ph">인권잡지 「다다름」</span> × <span class="ph">광산구장애인복지관</span> × <span class="ph">모두의 내일</span></p>'+
+          '<p class="foot">서비스 개선을 위해 익명 방문 통계를 수집합니다.</p>'+
         '</div>'+
         '</section></main>';
     }
@@ -718,11 +730,12 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
   function focusTop(){ var t=$app.querySelector('h1,h2'); if(t){ t.setAttribute('tabindex','-1'); t.focus({preventScroll:true}); } window.scrollTo(0,0); }
 
   $app.addEventListener('click', function(e){
+    var lk=e.target.closest('a.lnk'); if (lk) { track('outbound_click', { link_name: lk.classList.contains('map') ? 'naeilmap' : 'instagram', link_url: lk.href }); return; }
     var t=e.target.closest('[data-act]'); if(!t) return;
     var act=t.getAttribute('data-act'), w=WORDS[g.step];
     if (act==='sound') { SOUND=!SOUND; try { localStorage.setItem('dadareum-sound', SOUND?'on':'off'); } catch(err) {} if (SOUND) play('tap'); t.outerHTML=sndBtn(); var nb2=$app.querySelector('[data-act=sound]'); if(nb2) nb2.focus({preventScroll:true}); return; }
-    if (act==='start') { g=fresh('play'); play('start'); render(); focusTop(); return; }
-    if (act==='goto') { g.step=+t.getAttribute('data-i'); g.screen='play'; g.picked=[]; g.modal=null; g.tries=0; play('step'); render(); focusTop(); return; }
+    if (act==='start') { g=fresh('play'); play('start'); track('crossword_start'); render(); focusTop(); return; }
+    if (act==='goto') { track('question_replay', { question: WORDS[+t.getAttribute('data-i')].dir+' '+WORDS[+t.getAttribute('data-i')].n }); g.step=+t.getAttribute('data-i'); g.screen='play'; g.picked=[]; g.modal=null; g.tries=0; play('step'); render(); focusTop(); return; }
     if (act==='retry') { g.solved[g.step]=true; g.picked=[]; g.modal=null; g.tries=0; play('step'); render(); focusTop(); return; }
     if (act==='tile') {
       var i=+t.getAttribute('data-i');
@@ -731,7 +744,7 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
       $live.textContent=w.tiles[i]+' 입력, '+g.picked.length+'/'+w.ans.length+'글자';
       if (g.picked.length===w.ans.length) {
         var ok=g.picked.map(function(j){return w.tiles[j];}).join('')===w.w;
-        if (ok) { g.modal='ok'; play('correct'); } else { g.modal='bad'; g.wrong++; g.tries++; play('wrong'); }
+        if (ok) { g.modal='ok'; play('correct'); track('answer_correct', { question: w.dir+' '+w.n, wrong_count: g.tries, revealed: false }); } else { g.modal='bad'; g.wrong++; g.tries++; play('wrong'); track('hint_shown', { question: w.dir+' '+w.n, hint_step: g.tries }); }
       } else play('tap');
       render();
       if (!g.modal) { var nb=$app.querySelector('.tile:not([disabled])'); if(nb) nb.focus({preventScroll:true}); }
@@ -741,16 +754,17 @@ h1,h2,h3,.bubble,.badh{text-wrap:balance}
     if (act==='clear') { g.picked=[]; g.modal=null; render(); var ft=$app.querySelector('.tile'); if(ft) ft.focus({preventScroll:true}); return; }
     if (act==='reveal') {
       var used={}; g.picked=w.ans.map(function(ch){ for(var j=0;j<w.tiles.length;j++){ if(w.tiles[j]===ch && !used[j]){ used[j]=1; return j; } } return 0; });
-      g.revealed++; g.modal='ok'; play('correct'); render(); return;
+      g.revealed++; g.modal='ok'; play('correct'); track('answer_correct', { question: w.dir+' '+w.n, wrong_count: g.tries, revealed: true }); render(); return;
     }
     if (act==='next') {
       g.solved[g.step]=true;
       var nx=nextUnsolved(g.step);
-      if (nx<0) { g.screen='result'; play('fanfare'); } else { g.step=nx; play('step'); }
+      if (nx<0) { g.screen='result'; play('fanfare'); if (!COMPLETED) { COMPLETED = true; track('crossword_complete', { badge: badge()[0], wrong_count: g.wrong, revealed_count: g.revealed }); } } else { g.step=nx; play('step'); }
       g.picked=[]; g.modal=null; g.tries=0; render(); focusTop(); return;
     }
     if (act==='restart') { g=fresh('start'); render(); focusTop(); return; }
     if (act==='share') {
+      track('share_click');
       var st=document.getElementById('st'), msg='말랑말랑 배리어프리 낱말 여행 — 같이 풀어 봐요! '+SHARE_URL;
       var fail=function(){ st.textContent='복사가 안 되면 이 주소를 보내 주세요: '+SHARE_URL; };
       try { navigator.clipboard.writeText(msg).then(function(){ st.textContent='링크를 복사했어요. 카톡이나 문자에 붙여 넣어 보내 주세요.'; }, fail); } catch(err){ fail(); }
